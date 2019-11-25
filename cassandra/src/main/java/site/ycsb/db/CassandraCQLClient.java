@@ -104,6 +104,8 @@ public class CassandraCQLClient extends DB {
 
   public static final String MAX_CONNECTIONS_PROPERTY =
       "cassandra.maxconnections";
+  public static final String MAX_REQUEST_PER_CONNECTION_PROPERTY =
+      "cassandra.maxrequestperconnection";
   public static final String CORE_CONNECTIONS_PROPERTY =
       "cassandra.coreconnections";
   public static final String CONNECT_TIMEOUT_MILLIS_PROPERTY =
@@ -195,6 +197,14 @@ public class CassandraCQLClient extends DB {
           cluster.getConfiguration().getPoolingOptions()
               .setMaxConnectionsPerHost(HostDistance.LOCAL,
               Integer.valueOf(maxConnections));
+        }
+
+        String maxRequestPerConnection = getProperties().getProperty(
+            MAX_REQUEST_PER_CONNECTION_PROPERTY);
+        if (maxRequestPerConnection != null) {
+          cluster.getConfiguration().getPoolingOptions()
+              .setMaxRequestsPerConnection(HostDistance.LOCAL,
+                  Integer.valueOf(maxRequestPerConnection));
         }
 
         String coreConnections = getProperties().getProperty(

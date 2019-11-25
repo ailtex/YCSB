@@ -76,6 +76,7 @@ public class ElasticsearchRestClient extends DB {
 
     final int numberOfShards = parseIntegerProperty(props, "es.number_of_shards", NUMBER_OF_SHARDS);
     final int numberOfReplicas = parseIntegerProperty(props, "es.number_of_replicas", NUMBER_OF_REPLICAS);
+	final int maxRetryTimeout = parseIntegerProperty(props, "es.rest_max_retry_timeout", 30000);
 
     final Boolean newIndex = Boolean.parseBoolean(props.getProperty("es.new_index", "false"));
 
@@ -87,7 +88,9 @@ public class ElasticsearchRestClient extends DB {
       esHttpHosts.add(new HttpHost(nodes[0], Integer.valueOf(nodes[1]), "http"));
     }
 
-    restClient = RestClient.builder(esHttpHosts.toArray(new HttpHost[esHttpHosts.size()])).build();
+    restClient = RestClient.builder(esHttpHosts.toArray(new HttpHost[esHttpHosts.size()]))
+        .setMaxRetryTimeoutMillis(maxRetryTimeout)
+        .build();
 
     final Response existsResponse = performRequest(restClient, "HEAD", "/" + indexKey);
     final boolean exists = existsResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK;

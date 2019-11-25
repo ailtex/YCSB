@@ -22,6 +22,7 @@ import site.ycsb.DB;
 import site.ycsb.DBException;
 import site.ycsb.Status;
 import site.ycsb.StringByteIterator;
+
 import org.elasticsearch.action.DocWriteResponse;
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthRequest;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
@@ -67,21 +68,19 @@ public class ElasticsearchClient extends DB {
   private String indexKey;
 
   /**
-   *
    * Initialize any state for this DB. Called once per DB instance; there is one
    * DB instance per client thread.
    */
   @Override
   public void init() throws DBException {
     final Properties props = getProperties();
-
     this.indexKey = props.getProperty("es.index.key", DEFAULT_INDEX_KEY);
-
     final int numberOfShards = parseIntegerProperty(props, "es.number_of_shards", NUMBER_OF_SHARDS);
     final int numberOfReplicas = parseIntegerProperty(props, "es.number_of_replicas", NUMBER_OF_REPLICAS);
-
     final Boolean newIndex = Boolean.parseBoolean(props.getProperty("es.new_index", "false"));
-    final Builder settings = Settings.builder().put("cluster.name", DEFAULT_CLUSTER_NAME);
+    final String clusterName = props.getProperty("es.cluster.name", DEFAULT_CLUSTER_NAME);
+    final Builder settings = Settings.builder().put("cluster.name", clusterName);
+    final Boolean enableSniff = Boolean.parseBoolean(props.getProperty("es.client.transport.sniff", "true"));
 
     // if properties file contains elasticsearch user defined properties
     // add it to the settings file (will overwrite the defaults).
@@ -94,10 +93,10 @@ public class ElasticsearchClient extends DB {
       }
     }
 
-    settings.put("client.transport.sniff", true)
-            .put("client.transport.ignore_cluster_name", false)
-            .put("client.transport.ping_timeout", "30s")
-            .put("client.transport.nodes_sampler_interval", "30s");
+    settings.put("client.transport.sniff", enableSniff)
+        .put("client.transport.ignore_cluster_name", false)
+        .put("client.transport.ping_timeout", "30s")
+        .put("client.transport.nodes_sampler_interval", "30s");
     // Default it to localhost:9300
     final String[] nodeList = props.getProperty("es.hosts.list", DEFAULT_REMOTE_HOST).split(",");
     client = new PreBuiltTransportClient(settings.build());
@@ -108,7 +107,7 @@ public class ElasticsearchClient extends DB {
       try {
         address = InetAddress.getByName(nodes[0]);
       } catch (UnknownHostException e) {
-        throw new IllegalArgumentException("unable to identity host [" + nodes[0]+ "]", e);
+        throw new IllegalArgumentException("unable to identity host [" + nodes[0] + "]", e);
       }
       final int port;
       try {
@@ -207,10 +206,10 @@ public class ElasticsearchClient extends DB {
 
   @Override
   public Status read(
-          final String table,
-          final String key,
-          final Set<String> fields,
-          final Map<String, ByteIterator> result) {
+      final String table,
+      final String key,
+      final Set<String> fields,
+      final Map<String, ByteIterator> result) {
     try {
       final SearchResponse searchResponse = search(table, key);
       if (searchResponse.getHits().totalHits == 0) {
@@ -252,7 +251,7 @@ public class ElasticsearchClient extends DB {
       }
 
       final IndexResponse indexResponse =
-              client.prepareIndex(indexKey, table, hit.getId()).setSource(hit.getSource()).get();
+          client.prepareIndex(indexKey, table, hit.getId()).setSource(hit.getSource()).get();
 
       if (indexResponse.getResult() != DocWriteResponse.Result.UPDATED) {
         return Status.ERROR;

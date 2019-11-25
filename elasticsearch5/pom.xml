@@ -159,7 +159,7 @@ LICENSE file.
     </dependency>
     <dependency>
       <groupId>org.elasticsearch.client</groupId>
-      <artifactId>rest</artifactId>
+      <artifactId>elasticsearch-rest-client</artifactId>
       <version>${elasticsearch5-version}</version>
     </dependency>
     <dependency>

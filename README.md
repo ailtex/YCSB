@@ -78,3 +78,7 @@ To build the full distribution, with all database bindings:
 To build a single database binding:
 
     mvn -pl mongodb-binding -am clean package
+
+# Update
+1. update elasticsearch5-version to 5.6.16
+2. update cassandra.cql.version to 3.7.2

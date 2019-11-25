@@ -63,7 +63,7 @@ LICENSE file.
     <module name="Translation"/>
 
     <module name="FileLength"/>
-    <module name="FileTabCharacter"/>
+    <!--<module name="FileTabCharacter"/>-->
 
     <module name="TreeWalker">
 
@@ -181,10 +181,10 @@ LICENSE file.
         <!-- Miscellaneous other checks.                   -->
         <!-- See http://checkstyle.sf.net/config_misc.html -->
         <module name="ArrayTypeStyle"/>
-        <module name="Indentation">
-            <property name="basicOffset" value="2" />
-            <property name="caseIndent" value="0" />
-        </module> 
+        <!--<module name="Indentation">-->
+            <!--<property name="basicOffset" value="2" />-->
+            <!--<property name="caseIndent" value="0" />-->
+        <!--</module> -->
         <!-- <module name="TodoComment"/> -->
         <module name="UpperEll"/>
 
